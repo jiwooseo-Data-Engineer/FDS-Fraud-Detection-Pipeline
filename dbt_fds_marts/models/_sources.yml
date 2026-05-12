@@ -1,0 +1,32 @@
+version: 2
+
+sources:
+  - name: raw_data # {{ source('여기 들어가는 이름', '...') }}
+    description: "파이썬 데이터 생성기(Airflow)를 통해 수집된 FDS 원천 데이터"
+    # database: my_gcp_project_id  (실제 BigQuery/Snowflake 프로젝트 명)
+    # schema: my_raw_dataset       (실제 데이터셋/스키마 명)
+    tables:
+      - name: raw_card_transactions # {{ source('...', '여기 들어가는 이름') }}
+        description: "매일 자정에 적재되는 가상 카드 결제 로그"
+        
+        # '데이터 신선도(Freshness) 테스트!'
+        loaded_at_field: trx_at # 어떤 컬럼의 시간을 기준으로 신선도를 잴 것인가?
+        freshness:
+          warn_after: {count: 12, period: hour}  # 마지막 결제가 들어온 지 12시간이 지나면 경고(Warning)
+          error_after: {count: 24, period: hour} # 24시간이 지나면 에러(Error) 발생
+
+
+# 왜 테이블 이름을 그냥 안 쓰고 굳이 _sources.yml을 쓰나? 
+# SQL에서 그냥 FROM my_database.raw_card_transactions라고 하드코딩(직접 입력)하면 되는데, 왜 귀찮게 _sources.yml을 만들고 {{ source() }} 매크로를 썼나요?"라고 물어볼 수 있다.
+
+#1. 하드코딩 방지 및 환경(Dev/Prod) 분리
+# 테이블 경로를 직접 쓰면, 나중에 개발(Dev) 서버에서 운영(Prod) 서버로 넘어갈 때 수백 개의 SQL 파일을 다 열어서 데이터베이스 이름을 수정해야 한다. 
+# 하지만 _sources.yml을 쓰면 한 곳에서만 설정을 바꾸면 모든 SQL이 자동으로 운영 서버를 바라보게 되어 유지보수성이 극대화된다."
+
+#2. 소스 데이터의 '신선도(Freshness)' 모니터링
+#"Airflow 수집 파이프라인이 조용히 고장 나서 원본 데이터가 어제부터 안 들어오고 있을 수 있다.
+# _sources.yml에 freshness 설정을 해두면, dbt source freshness 명령어 하나로 '데이터가 제때 잘 들어오고 있는지(SLA 준수 여부)'를 자동으로 검사하고 알람을 받을 수 있다."
+
+#3. 데이터 계보도(Lineage)의 시작점
+#"dbt 문서를 생성했을 때, 이 파일이 있어야만 파이프라인 그래프의 맨 왼쪽(가장 첫 출발점)에 '녹색 노드(Source)'가 그려집니다. 데이터의 전체 흐름을 시각화하기 위한 요소다."
+

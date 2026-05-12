@@ -1,0 +1,21 @@
+fds_profile: # dbt_project.yml에서 선언한 바로 그 이름!
+  target: dev # 기본적으로 실행할 타겟 환경 (개발 환경)
+  outputs:
+    
+    # 1. 개발(Dev) 환경 셋팅
+    dev:
+      type: bigquery
+      method: service-account
+      project: my-gcp-project-id       # GCP 프로젝트 ID
+      dataset: fds_dev_marts           # 데이터셋(스키마) 이름
+      threads: 4                       # 동시에 쿼리를 몇 개까지 돌릴 것인가?
+      keyfile: /Users/jiwoo/.gcp/bq-key.json # 빅쿼리 접속용 비밀키(JSON) 경로
+      
+    # 2. 운영(Prod) 환경 셋팅 (참고용)
+    prod:
+      type: bigquery
+      method: service-account
+      project: my-gcp-project-id
+      dataset: fds_prod_marts          # 실제 운영 서비스용 데이터셋
+      threads: 8
+      keyfile: /Users/jiwoo/.gcp/bq-key.json

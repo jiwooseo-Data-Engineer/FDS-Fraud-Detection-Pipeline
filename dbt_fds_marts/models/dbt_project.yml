@@ -1,0 +1,36 @@
+# 프로젝트 전체 규칙
+
+#dbt는 어떤 폴더를 열었을 때 이 파일이 있어야만 "아, 여기가 dbt 프로젝트구나"라고 인식합니다.
+
+# 1. 프로젝트 기본 정보
+name: 'fds_fraud_detection'
+version: '1.0.0'
+config-version: 2
+
+# 2. 연결 정보 (profiles.yml에 정의될 데이터베이스 연결 이름)
+profile: 'fds_profile'
+
+# 3. 폴더 경로 설정 (dbt가 어느 폴더에서 SQL과 테스트를 찾아야 하는지 알려줌)
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# 4. 모델(SQL)별 글로벌 생성 전략 (Materialization Strategy)
+# '비용/성능 최적화' 셋팅
+models:
+  fds_fraud_detection: # 위에서 선언한 프로젝트 이름
+    
+    # staging 폴더 안의 모든 SQL은 물리적 테이블이 아닌 가벼운 'View(뷰)'로 생성해라
+    staging:
+      +materialized: view
+      
+    # intermediate 폴더 안의 모델들도 임시 연산용이므로 가벼운 'Ephemeral'이나 'View'로 생성
+    intermediate:
+      +materialized: ephemeral # 물리적으로 저장하지 않고 CTE(WITH절)처럼 메모리에서만 사용
+      
+    # marts 폴더 안의 최종 팩트 테이블은 BI 툴에서 빠르게 조회해야 하므로 무거운 'Table'로 생성
+    marts:
+      +materialized: table
