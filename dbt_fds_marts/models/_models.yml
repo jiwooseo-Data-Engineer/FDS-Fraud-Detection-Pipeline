@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: fct_fraud_alerts
+    description: "해외 결제 FDS(이상 거래 탐지) 최종 데이터 마트"
+    columns:
+      - name: trx_id
+        description: "고유 결제 ID"
+        tests:
+          - unique
+          - not_null
+
+      - name: user_id
+        description: "유저 식별자"
+        tests:
+          - not_null
+
+      - name: amount
+        description: "결제 금액"
+        tests:
+          - not_null
+
+      - name: is_impossible_travel_fraud
+        description: "시공간 모순 로직(Impossible Travel)에 의한 이상 거래 의심 플래그 (True/False)"
+        tests:
+          - not_null
+
+  - name: int_trx_with_lag
+    description: "LAG 함수를 사용하여 직전 결제 시간/위치 정보를 추가한 Intermediate 모델"
+    columns:
+      - name: time_diff_minutes
+        description: "직전 결제와의 시간 차이 (분 단위)"
