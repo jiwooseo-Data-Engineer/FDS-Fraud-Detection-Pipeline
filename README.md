@@ -13,8 +13,8 @@ FDS (Fraud Detection System) Data Pipeline
 <br>
 
 ## 🏗️ Architecture & Data Flow
-![Architecture Diagram](docs/architecture_diagram.png) 
-*(여기에 나중에 아키텍처 이미지를 추가하시면 됩니다!)*
+![Architecture Diagram](architecture_diagram.png) 
+
 
 1. **Data Generation:** `Python Faker`를 활용해 일일 5,000건의 비즈니스 룰(국내 80/해외 20)이 반영된 가상 결제 로그 데이터 생성
 2. **Orchestration:** `Apache Airflow`를 이용해 일일 배치(Daily Batch) 파이프라인 구축 및 내결함성(Fault Tolerance) 확보
