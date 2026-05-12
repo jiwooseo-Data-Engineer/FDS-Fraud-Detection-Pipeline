@@ -1,10 +1,12 @@
 FDS (Fraud Detection System) Data Pipeline
-**해외 결제 이상 거래 탐지를 위한 시공간 기반 데이터 마트 및 자동화 파이프라인 구축**
+시공간 모순(Impossible Travel) 및 비즈니스 로직 기반의 해외 결제 이상 거래 탐지 파이프라인
 
 <br>
 
-## 📌 Project Overview
-본 프로젝트는 글로벌 카드 결제 서비스에서 발생하는 **이상 거래(Fraud)**를 사전에 탐지하기 위해 구축된 데이터 파이프라인입니다. 단순한 결제액 집계를 넘어, 시계열 데이터와 위경도 데이터를 결합하여 **'물리적으로 불가능한 이동(Impossible Travel)'**을 찾아내는 고도화된 비즈니스 룰을 데이터 웨어하우스 단에서 구현했습니다.
+## Project Overview
+본 프로젝트는 글로벌 카드 결제 서비스에서 발생할 수 있는 이상 거래(Fraud)를 사전에 탐지하고 분석하기 위한 End-to-End 데이터 파이프라인입니다. 단순히 데이터를 적재하는 것에 그치지 않고, 물리적 이동 한계를 초과하는 결제 패턴을 정밀하게 타격하는 비즈니스 로직을 구현했습니다.
+
+데이터 엔지니어링의 핵심인 멱등성(Idempotency), 내결함성(Fault Tolerance), 그리고 데이터 무결성(Data Integrity)을 확보하는 데 초점을 맞추어 설계되었습니다.
 
 * **기여도:** 100% (개인 프로젝트)
 * **주요 스택:** Python, Apache Airflow, dbt(data build tool), SQL
@@ -12,7 +14,7 @@ FDS (Fraud Detection System) Data Pipeline
 
 <br>
 
-## 🏗️ Architecture & Data Flow
+## Architecture & Data Flow
 ![Architecture Diagram](architecture_diagram.png) 
 
 
@@ -22,7 +24,7 @@ FDS (Fraud Detection System) Data Pipeline
 
 <br>
 
-## 💡 Key Engineering Challenges & Solutions
+💡 Key Engineering Challenges & Solutions
 
 ### 1. `LAG` 윈도우 함수를 활용한 '시공간 모순(Impossible Travel)' 탐지
 * **문제:** 서울에서 결제한 지 30분 만에 뉴욕에서 결제가 발생하는 도용 케이스를 찾아야 함. 수백만 건의 데이터를 루프(Loop)로 탐색하는 것은 비효율적.
@@ -37,11 +39,29 @@ FDS (Fraud Detection System) Data Pipeline
 
 <br>
 
+## 🛠️ Tech Stack
+Language: Python 3.x, SQL
+
+Orchestration: Apache Airflow
+
+Data Transformation: dbt (data build tool)
+
+Data Warehouse: Google BigQuery (Standard SQL)
+
+Version Control: Git / GitHub
+
 ## 📂 Repository Structure
 ```text
 📦 FDS-Fraud-Detection-Pipeline
- ┣ 📂 dags/                   # Airflow 스케줄링 파일 (fds_daily_pipeline.py)
- ┣ 📂 data_generator/         # Python Faker 기반 데이터 생성 모듈
- ┣ 📂 dbt_fds_marts/          # dbt SQL 모델링 (Staging, Intermediate, Marts)
- ┣ 📂 docs/                   # 다이어그램 및 에셋
- ┗ 📜 README.md
+ ┣ 📂 dags/                   # Airflow DAGs (Scheduling & Retries)
+ ┣ 📂 data_generator/         # Python Faker 기반 데이터 생성 로직
+ ┣ 📂 dbt_fds_marts/
+ ┃ ┣ 📂 macros/               # 하버사인 거리 계산 등 재사용 로직
+ ┃ ┣ 📂 models/
+ ┃ ┃ ┣ 📂 staging/            # Raw 데이터 정제 (Staging Layer)
+ ┃ ┃ ┣ 📂 intermediate/       # 비즈니스 로직 가공 (Intermediate Layer)
+ ┃ ┃ ┗ 📂 marts/              # 최종 분석용 데이터 (Marts Layer)
+ ┃ ┣ 📜 dbt_project.yml       # dbt 전역 설정 및 구체화 전략
+ ┃ ┗ 📜 profiles.sample.yml   # DB 접속 설정 샘플 (보안 가이드 포함)
+ ┣ 📜 README.md
+ ┗ 📜 requirements.txt
